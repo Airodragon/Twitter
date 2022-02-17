@@ -435,9 +435,27 @@ def deleteRetweetComment(comment_id,retweet_id):
 
 @app.route('/news', methods = ['GET','POST'])
 def news():
+
     query = searchNews()
     all_articles=[]
     if query.validate_on_submit():
         newsapi = NewsApiClient(api_key='c2d72a4ef82d4304a5aa8eff2bf67a90')
         all_articles = newsapi.get_everything(q=query.query.data)
     return render_template('news.html',query=query,news=all_articles)
+
+
+@app.route('/chat/<int:user1>/<user2>',methods=['GET','POST'])
+def message(user1,user2):
+    if user1!=current_user.id and user2!=current_user.id:
+        abort(403)
+
+    sender_id = user1 if current_user.id==user1 else user2
+    receiver_id = user2 if current_user.id==user1 else user1
+
+    sender = User.query.filter_by(id=sender_id).first()
+    receiver = User.query.filter_by(id=receiver_id).first()
+
+
+    return render_template('chat.html',sender_id=sender_id,receiver_id=receiver_id,sender=sender,receiver=receiver,user1=user1,user2=user2)
+    
+    

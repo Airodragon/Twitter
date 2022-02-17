@@ -26,13 +26,13 @@
     <div class="seperator"></div>
     {% for post in timeline.items %}
 
-        <div class="tweet" style="border-bottom: 0.1em solid white;">
+        <div class="tweet" style="border-bottom: 1px solid gray;">
             <div class="userTweet">
                 <div class="meta_tweet">
                     <img src="{{ url_for('static', filename='Images/Users/profile_pics/' + post.author.profile_image) }}" style="width:50px; height: 50px; border-radius: 50%; margin-right: 10px; margin-top: 20px;" alt="">
                     <div>
                         <h3 style="margin-bottom: 0px;"><a class="username" href="{{ url_for('viewProfile',account_id=post.author.id) }}"> @{{ post.author.username }}</a></h3>
-                        <p style="font-size: 12px;"><span style="font-weight: bold; color: red;">Posted on </span>{{ post.stamp }}</p>
+                        <p style="font-size: 12px;"><span style="font-weight: bold; color: dodgerblue;">Posted on </span>{{ post.stamp }}</p>
                     </div>
                 </div>
                 <p style="margin-top: 5px;">{{ post.tweet }}</p>
@@ -42,6 +42,20 @@
                         <span class="w3-button w3-hover-red w3-xlarge w3-display-topright">&times;</span>
                         <div class="w3-modal-content w3-animate-zoom">
                             <img src="{{ url_for('static', filename='Images/Tweets/' + post.post_img) }}" style="width:100%">
+                        </div>
+                    </div>
+                {% elif post.post_vid %}
+                    <video width="320" height="240" 
+                        onclick="document.getElementById('modal_image_tweet{{post.id}}').style.display='block'" 
+                        controls>
+                        <source src="{{ url_for('static', filename='Images/Tweets/' + post.post_vid) }}" alt="">
+                    </video>
+                    <div id="modal_image_tweet" class="w3-modal" onclick="this.style.display='none'">
+                        <span class="w3-button w3-hover-red w3-xlarge w3-display-topright">&times;</span>
+                        <div class="w3-modal-content w3-animate-zoom">
+                            <video>
+                                <source src="{{ url_for('static', filename='Images/Tweets/' + post.post_vid) }}">
+                            </video>
                         </div>
                     </div>
                 {% endif %}
@@ -68,7 +82,7 @@
                 <img src="{{ url_for('static', filename='Images/Users/profile_pics/' + retweets.retweeter.profile_image) }}" style="width:50px; height: 50px; border-radius: 50%; margin-right: 10px; margin-top: 20px;" alt="">
                 <div>
                     <h3 style="margin-bottom: 0px;"><a class="username" href="{{ url_for('viewProfile',account_id=retweets.retweeter.id) }}"> @{{ retweets.retweeter.username }}</a></h3>
-                    <p style="font-size: 12px;"><span style="font-weight: bold; color: red;">Posted on </span>{{ retweets.retweet_stamp }}</p>
+                    <p style="font-size: 12px;"><span style="font-weight: bold; color: dodgerblue;">Posted on </span>{{ retweets.retweet_stamp }}</p>
                 </div>
             </div>
             <p style="margin-top: 5px;">{{ retweets.retweet_text }}</p>
@@ -89,7 +103,7 @@
                                         <img src="{{ url_for('static', filename='Images/SVG/bookmark.svg') }}" style="margin: 20px 30px 0px 0px;" class="filter_white" alt="">
                                     </a>
                                 </div>
-                                <p style="font-size: 12px;"><span style="font-weight: bold; color: red;">Posted on </span>{{ retweets.ori_post.stamp }}}</p>
+                                <p style="font-size: 12px;"><span style="font-weight: bold; color: dodgerblue;">Posted on </span>{{ retweets.ori_post.stamp }}}</p>
                             </div>
                         </div>
                         <p style="margin-top: 5px;">{{ retweets.ori_post.tweet }}</p>
@@ -99,6 +113,21 @@
                                 <span class="w3-button w3-hover-red w3-xlarge w3-display-topright">&times;</span>
                                 <div class="w3-modal-content w3-animate-zoom">
                                     <img src="{{ url_for('static', filename='Images/Tweets/' + retweets.ori_post.post_img) }}" style="width:100%">
+                                </div>
+                            </div>
+
+                        {% elif retweets.ori_post.post_vid %}
+                            <video width="320" height="240" 
+                                onclick="document.getElementById('modal_image_tweet{{retweets.id}}').style.display='block'" 
+                                controls>
+                                <source src="{{ url_for('static', filename='Images/Tweets/' + retweets.ori_post.post_vid) }}" alt="">
+                            </video>
+                            <div id="modal_image_retweet" class="w3-modal" onclick="this.style.display='none'">
+                                <span class="w3-button w3-hover-red w3-xlarge w3-display-topright">&times;</span>
+                                <div class="w3-modal-content w3-animate-zoom">
+                                    <video>
+                                        <source src="{{ url_for('static', filename='Images/Tweets/' + retweets.ori_post.post_vid) }}">
+                                    </video>
                                 </div>
                             </div>
                         {% endif %}

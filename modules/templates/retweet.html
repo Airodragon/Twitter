@@ -17,12 +17,17 @@
                 <img src="{{ url_for('static', filename='Images/Users/profile_pics/' + post.author.profile_image) }}" style="width:50px; height: 50px; border-radius: 50%; margin-right: 10px; margin-top: 20px;" alt="">
                 <div>
                     <h3 style="margin-bottom: 0px;">@{{ post.author.username }}</h3>
-                    <p style="font-size: 12px;"><span style="font-weight: bold; color: red;">Posted on </span>{{ post.stamp }}</p>
+                    <p style="font-size: 12px;"><span style="font-weight: bold; color: dodgerblue;">Posted on </span>{{ post.stamp }}</p>
                 </div>
             </div>
             <p style="margin-top: 5px;">{{ post.tweet }}</p>
             {% if post.post_img %}
             <img src="{{ url_for('static', filename='Images/Tweets/'+post.post_img) }}" class="tweet_image" alt="">
+
+            {% elif post.post_vid %}
+            <video width="320" height="240" controls>
+                <source src="{{ url_for('static', filename='Images/Tweets/'+post.post_vid) }}" alt="">
+            </video>
             {% endif %}
         </div>
     </div>

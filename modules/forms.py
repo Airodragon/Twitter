@@ -37,7 +37,7 @@ class Login(FlaskForm):
 class createTweet(FlaskForm):
     tweet = TextAreaField("What\'s on your mind?", validators = [DataRequired(), Length(max = 280)])
     tweet_img = FileField("Include image", validators = [FileAllowed(['jpg', 'jpeg', 'png','gif'])])
-    tweet_vid = FileField("Include video",validators=[FileAllowed(['.mp4'])])
+    tweet_vid = FileField("Include video",validators=[FileAllowed(['mp4'])])
     submit = SubmitField("Tweet")
 
 class UpdateProfile(FlaskForm):
