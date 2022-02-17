@@ -1,0 +1,34 @@
+{% extends 'mainPage.html' %}
+
+{% block pageContent %}
+
+    <div class="alert">
+        <h3>Retweet this post</h3>
+    </div>
+    
+    <div class="choice alert">
+        <form action="{{ url_for('retweet',post_id=post.id) }}" method="post">
+            {{ tweet.csrf_token }}
+            <p>Add comment</p>
+            {{tweet.tweet(class='retweet_pannel')}}
+            <div class="sample">
+                <div class="userTweet">
+            <div class="meta_tweet">
+                <img src="{{ url_for('static', filename='Images/Users/profile_pics/' + post.author.profile_image) }}" style="width:50px; height: 50px; border-radius: 50%; margin-right: 10px; margin-top: 20px;" alt="">
+                <div>
+                    <h3 style="margin-bottom: 0px;">@{{ post.author.username }}</h3>
+                    <p style="font-size: 12px;"><span style="font-weight: bold; color: red;">Posted on </span>{{ post.stamp }}</p>
+                </div>
+            </div>
+            <p style="margin-top: 5px;">{{ post.tweet }}</p>
+            {% if post.post_img %}
+            <img src="{{ url_for('static', filename='Images/Tweets/'+post.post_img) }}" class="tweet_image" alt="">
+            {% endif %}
+        </div>
+    </div>
+    {{tweet.submit(class='submit_tweet',value='Retweet')}}
+</form>
+</div>
+    
+
+{% endblock %}

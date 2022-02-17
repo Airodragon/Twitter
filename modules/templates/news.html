@@ -1,0 +1,57 @@
+{% extends 'mainPage.html' %}
+
+{% block pageContent %}
+<h1 class="greeting"><b>NEWS</b></h1>
+<div class="tweet">
+    <form action="{{ url_for('news') }}" method="post" enctype="multipart/form-data">
+        {{query.csrf_token}}
+
+        {{query.query(class='tweet_pannel',placeholder="Search for topics that interest you")}}
+        {{query.submit(class='submit_tweet')}}
+
+    </form>
+</div>
+
+
+<div class="timeline">
+    {% if news|length>0 %}
+    <h2 style="margin-left: 5%;"> Results related to: <b>{{ query.query.data }}</b></h2>
+    {% for article in news["articles"] %}
+    <div class="tweet comment" style="width: 95%">
+        <div class="userTweet">
+            <div class="meta_tweet">
+                <div>
+                    <h2 style="margin-bottom: 0px; color: rgb(67, 158, 250);"><a class="username"
+                            style="color: red;" href="{{ article['url'] }}">{{ article["title"] }}</a></h2>
+                    <p style="font-size: 12px; margin-top: 5px;">
+
+                        {{
+                        article["publishedAt"].split("T")[1][:-1].split(":")[0]}}{{article["publishedAt"].split("T")[1][:-1].split(":")[1]}}{{"hrs"}}
+                    </p>
+                    <p style="font-size: 20px; margin-top: 5px;">
+                        {{ article["content"] | truncate(190) }}
+                    </p>
+                    <p style="font-size: 15px; margin-top: 5px;"> Read the full story <a style="color: red;"
+                            href="{{ article['url']}}">here.</a> </p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% endfor %}
+
+    {% else %}
+    <h3 style="margin-left: 5%;">Search for a topic or go back to <span><a class="username" style="color: red;"
+                href="{{ url_for('dashboard') }}">dashboard</a></span>.
+        {% endif %}
+</div>
+
+
+
+
+
+
+{% endblock %}

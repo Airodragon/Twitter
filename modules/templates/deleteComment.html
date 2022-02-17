@@ -1,0 +1,55 @@
+{% extends 'mainPage.html' %}
+
+{% block pageContent %}
+
+    <div class="alert">
+        <h3>Delete Comment</h3>
+        <p></p>
+    </div>
+
+    {% if removed_comment.post_id != None %}
+
+        <div class="sample">
+            <div class="userTweet">
+                <div class="meta_tweet">
+                    <div>
+                        <h3 style="margin-bottom: 0px;">@{{ removed_comment.commenter }}</h3>
+                        <p style="font-size: 12px; margin-top: 5px;"> {{ removed_comment.comment_stamp }}</p>
+                    </div>
+                </div>
+                <p style="margin-top: 5px;">{{ removed_comment.comment }}</p>
+
+            </div>
+        </div>
+
+        <div class="choice alert">
+            <form action="{{ url_for('deletePostComment',post_id=post_id, comment_id = removed_comment.id) }}" method="post">
+                <input type="submit" class="danger" value="Delete"></input>
+            </form>
+            <div class="neutral"><a href="{{ url_for('comment_post', post_id = post_id ) }}">Cancel</a></div>
+        </div>
+
+    {% else %}
+
+    <div class="sample">
+        <div class="userTweet">
+            <div class="meta_tweet">
+                <div>
+                    <h3 style="margin-bottom: 0px;">@{{ removed_comment.commenter }}</h3>
+                    <p style="font-size: 12px; margin-top: 5px;"> {{ removed_comment.comment_stamp }}</p>
+                </div>
+            </div>
+            <p style="margin-top: 5px;">{{ removed_comment.comment }}</p>
+        </div>
+    </div>
+
+    <div class="choice alert">
+        <form action="{{ url_for('deleteRetweetComment',retweet_id=post_id, comment_id = removed_comment.id) }}" method="post">
+            <input type="submit" class="danger" value="Delete"></input>
+        </form>
+        <div class="neutral"><a href="{{ url_for('comment_retweet', post_id=post_id ) }}">Cancel</a></div>
+    </div>
+
+    {% endif %}
+
+{% endblock %}

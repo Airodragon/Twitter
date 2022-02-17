@@ -1,0 +1,94 @@
+{% extends 'mainPage.html' %}
+
+{% block pageContent %}
+<h1 class="greeting"><b>COMMENTS</b></h1>
+<div class="tweet interaction-parent">
+    
+    {% if request.url.split('/')[3].endswith('post') %}
+    <form action="{{ url_for('comment_post', post_id = curr_post_id ) }}" method="post" enctype="multipart/form-data">
+        {{curr_comment.csrf_token}}
+
+        {{curr_comment.comment(class='tweet_pannel',placeholder="Tweet your reply...")}}
+        {{curr_comment.submit(class='submit_tweet')}}
+
+    </form>
+    {% elif request.url.split('/')[3].endswith('retweet') %}
+    <form action="{{ url_for('comment_retweet', post_id = curr_post_id ) }}" method="post" enctype="multipart/form-data">
+        {{curr_comment.csrf_token}}
+
+        {{curr_comment.comment(class='tweet_pannel',placeholder="Tweet your reply...")}}
+        {{curr_comment.submit(class='submit_tweet')}}
+
+    </form>
+    {% endif %}
+
+
+</div>
+
+<div class="timeline">
+
+    {% for row in comments %}
+    {% if row.post_id != None %}
+
+    <div class="tweet comment">
+        <div class="userTweet">
+            <div class="meta_tweet">
+                <div>
+                    <h4 style="margin-bottom: 0px;"><a class="username"
+                            href="{{ url_for('viewProfile',account_id=row.user_id) }}"> @{{
+                            row.commenter }}</a></h4>
+                    <p style="font-size: 12px; margin-top: 5px;">
+                        <!-- <span style="font-weight: bold; color: rgb(22, 100, 177);">Posted on </span> -->
+                        {{ row.comment_stamp }}
+                    </p>
+                </div>
+            </div>
+            <p style="margin-top: 20px; font-size: large;"><b>{{ row.comment }}</b></p>
+            
+        </div>
+
+        
+        {% if row.commenter== name %}
+        <a href="{{ url_for('delete_post_comment',post_id=row.post_id, comment_id=row.id) }}">
+            <img src="{{ url_for('static', filename='Images/SVG/delete.svg') }}" class="filter_white" alt="">
+        </a>
+        {% endif %}
+    </div>
+
+    {% else %}
+
+    <div class="tweet comment">
+        <div class="userTweet">
+            <div class="meta_tweet">
+                <div>
+                    <h4 style="margin-bottom: 0px;"><a class="username"
+                            href="{{ url_for('viewProfile',account_id=row.user_id) }}"> @{{
+                            row.commenter }}</a></h4>
+                    <p style="font-size: 12px; margin-top: 5px;">
+                        <!-- <span style="font-weight: bold; color: rgb(22, 100, 177);">Posted on </span> -->
+                        {{ row.comment_stamp }}
+                    </p>
+                </div>
+            </div>
+            <p style="margin-top: 20px; font-size: large;"><b>{{ row.comment }}</b></p>
+            
+        </div>
+        {% if row.commenter == name %}
+
+            <a href="{{ url_for('delete_rt_comment',post_id=row.retweet_id, comment_id=row.id) }}">
+                <img src="{{ url_for('static', filename='Images/SVG/delete.svg') }}" class="filter_white" alt="">
+            </a>
+        {% endif %}
+        <br>
+
+    </div>
+
+    {% endif %}
+
+    
+    {% endfor %}
+
+
+</div>
+
+{% endblock %}

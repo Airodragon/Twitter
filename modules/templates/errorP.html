@@ -1,0 +1,7 @@
+{% extends 'bool_base.html' %}
+
+{% block message %}
+<h1>Sorry, couldn't verify you :(</h1>
+<p>Wrong password</p>
+<p>Go back to <a href="{{ url_for('home') }}">Twitter home</a> and try logging again</p>
+{% endblock %}
