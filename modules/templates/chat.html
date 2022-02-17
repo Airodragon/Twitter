@@ -12,16 +12,16 @@
         $(document).ready(function(){
             var socket = io.connect("http://127.0.0.1:5000/chat/{{user1}}/{{user2}}");
             socket.on("connect", function(){
-                socket.send("User has connected!");
+                socket.send("{{receiver.username}} has connected!");
             });
-
+            
             socket.on("message", function(msg){
-                $("#messages").append('<li>' + msg + '</li>');
+                $("#messages").append('<p>' + msg + '</p>');
                 console.log("Message received");
             });
 
             $('#sendButton').on('click', function(){
-                socket.send($('#myMessage').val()+"----"+"{{sender_id}}"+"----"+"{{receiver_id}}");
+                socket.send(""+"{{username1}}"+" : "+$('#myMessage').val());
                 $('#myMessage').val('');
             });
 
@@ -29,7 +29,7 @@
     </script>
 
     <ul id="messages"></ul>
-    <input type="text", id="myMessage">
+    <input type="text", id="myMessage" style="margin:5px;">
     <button id="sendButton">Send</button>
 
 </div>
