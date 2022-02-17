@@ -1,11 +1,33 @@
 {% extends 'mainPage.html' %}
 
 {% block pageContent %}
-<h1 class="greeting"><b>CHAT</b></h1>
-<h1 class="greeting"><b>@{{receiver.username}}</b></h1>
+<h1 class="greeting"><b style="font-family:monospace">CHAT WINDOW</b></h1>
+
+<h1 class="greeting"><img src='{{ profile }}' alt="" style="display: inline;width: 5%;border-radius: 50%;margin-right: 10px;"><b  style="font-family:monospace;font-stretch: expanded;">{{receiver.username}}</b></h1>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<div class="timeline">
+    {% for message in history%}
+    <div class="tweet comment" style="width: 95%;">
+        <div class="userTweet">
+            <div class="meta_tweet" style="display: block;">
+                <p style="margin-bottom: 0px; color: rgb(67, 158, 250); font-size: 20px; margin-top: 5px;">
+                    <a class="username" style="color: dodgerblue;" href="{{url_for('viewProfile', account_id=message[4]) }}">@{{message[2]}}</a>
+                </p>
+
+                <p style="font-size: 12px; margin-top: 5px;">{{message[3]}}</p>
+                <p style="font-size: 20px; margin-top: 5px;">{{message[1]}}</p>
+
+            </div>
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
 
 <div class="timeline">
     <script type="text/javascript">
@@ -29,7 +51,7 @@
     </script>
 
     <ul id="messages"></ul>
-    <input type="text", id="myMessage" style="margin:5px;">
+    <input type="text" id="myMessage" style="margin:15px;display: inline;">
     <button id="sendButton">Send</button>
 
 </div>

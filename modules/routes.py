@@ -447,5 +447,6 @@ def message(user1, user2):
     sender = User.query.filter_by(id = sender_id).first()
     receiver = User.query.filter_by(id = receiver_id).first()
 
+    profile_pic = url_for('static', filename = 'Images/Users/profile_pics/' + receiver.profile_image)
     return render_template('chat.html', sender_id = sender_id, receiver_id = receiver_id, 
-    sender = sender, receiver = receiver, user1 = user1, user2 = user2,username1 = current_user.username, username2 = receiver.username)
+    sender = sender, receiver = receiver, user1 = user1, user2 = user2,username1 = current_user.username, username2 = receiver.username, profile=profile_pic)
