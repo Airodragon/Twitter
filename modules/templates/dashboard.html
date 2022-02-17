@@ -14,12 +14,25 @@
                     <div class="w3-container" style="background-color: red;">
                         <img src="{{ url_for('static', filename='Images/SVG/twitter.svg') }}" alt=""
                             style="width: 50px; height: auto; margin-bottom: 20px;">
-                        <p>Upload an image from your device.</p>
+                        <p>Upload an image or gif from your device.</p>
                         <div class="form-group files">
                             {{tweet.tweet_img}}
                         </div>
                     </div>
                     <button type="button" onclick="document.getElementById('id01').style.display='none'">X</button>
+                </div>
+            </div>
+            <div id="id02" class="w3-modal" style="display: none;">
+                <div class='w3-modal-content upload_window' style="padding: 30px; background-color: red;">
+                    <div class="w3-container" style="background-color: red;">
+                        <img src="{{ url_for('static', filename='Images/SVG/twitter.svg') }}" alt=""
+                            style="width: 50px; height: auto; margin-bottom: 20px;">
+                        <p>Upload an video from your device.</p>
+                        <div class="form-group files">
+                            {{tweet.tweet_vid}}
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('id02').style.display='none'">X</button>
                 </div>
             </div>
         </div>
@@ -29,6 +42,12 @@
             style="background-color: #00000000; border:none;">
             <img src="{{ url_for('static', filename='Images/SVG/image.svg') }}" class="" alt="">
         </button>
+
+        <button type="button" onclick="document.getElementById('id02').style.display='block'" 
+            style="background-color: #00000000;border: none;">
+        <img src="{{ url_for('static',filename='Images/SVG/video.svg') }}" class="" alt="">
+        </button>
+
 
 
     </form>
@@ -71,7 +90,11 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
-
+            {% elif row.from_post.post_vid %}
+            <video width="320" height="240"
+                onclick="document.getElementById('modal_image_tweet{{row.from_post.id}}').style.display='block'" controls>
+                <source src="{{ url_for('static',filename='Images/Tweets/'+ row.from_post.post_vid)}}" alt="">
+            </video>
             {% endif %}
         </div>
 

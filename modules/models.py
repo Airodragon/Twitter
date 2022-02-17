@@ -29,6 +29,7 @@ class Post(db.Model):
     tweet = db.Column(db.String(500), nullable=False)
     stamp = db.Column(db.String(20), nullable=False)
     post_img = db.Column(db.String(20))
+    post_vid = db.Column(db.String(100))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     likes = db.Column(db.Integer, nullable=False, default=0)
 

@@ -93,8 +93,13 @@ def dashboard():
         if user_tweet.tweet_img.data:
             tweet_img = save_tweet_picture(user_tweet.tweet_img.data)
             post = Post(tweet = user_tweet.tweet.data, stamp = currentTime, author = current_user, post_img = tweet_img)
+        elif user_tweet.tweet_vid.data:
+            tweet_vid = save_tweet_picture(user_tweet.tweet_vid.data)
+            post = Post(tweet = user_tweet.tweet.data, stamp = currentTime, author = current_user, post_vid = tweet_vid)
+
         else:
             post = Post(tweet = user_tweet.tweet.data, stamp = currentTime, author = current_user)
+        
         db.session.add(post)
         db.session.commit()
 
