@@ -1,25 +1,24 @@
 from logging import log
-from operator import irshift
+from posixpath import commonpath
 from re import U
-import re
 from types import MethodDescriptorType
 from flask import Flask, render_template, redirect, request, url_for, flash, abort
 from sqlalchemy.sql.expression import false
+from sqlalchemy.sql.functions import user
 from sqlalchemy.sql.sqltypes import Time
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, current_user, login_required
 from sqlalchemy import desc
-from modules.forms import createTweet
 from modules import db, app
 from modules.models import User, Post, Timeline, Retweet, Bookmark, Likes, Comments
-from modules.forms import Signup, Login, UpdateProfile, createComment, searchNews
+from modules.forms import Signup, Login, UpdateProfile, createTweet, createComment, searchNews
 from modules.functions import save_tweet_picture, save_bg_picture, save_profile_picture, delete_old_images
+from newsapi import NewsApiClient
+
 
 ######### AUTHENTICATION #########
 import datetime
 from datetime import date
-from newsapi import NewsApiClient
-
 
 def age(birthdate):
     today = date.today()
@@ -96,10 +95,8 @@ def dashboard():
         elif user_tweet.tweet_vid.data:
             tweet_vid = save_tweet_picture(user_tweet.tweet_vid.data)
             post = Post(tweet = user_tweet.tweet.data, stamp = currentTime, author = current_user, post_vid = tweet_vid)
-
         else:
             post = Post(tweet = user_tweet.tweet.data, stamp = currentTime, author = current_user)
-        
         db.session.add(post)
         db.session.commit()
 
@@ -239,7 +236,7 @@ def retweet(post_id):
         x = datetime.datetime.now()
         currentTime = str(x.strftime("%d")) + " " + str(x.strftime("%b")) + " " + str(x.strftime("%y")) + " " + str(x.strftime("%I")) + ":" + str(x.strftime("%M")) + " " + str(x.strftime("%p"))
 
-        retweet = Retweet(tweet_id = post.id, user_id = current_user.id, retweet_stamp = currentTime, retweet_text = new_tweet.tweet.data)
+        retweet = Retweet(tweet_id = post.id, user_id = current_user.id, stamp = currentTime, retweet_text = new_tweet.tweet.data)
         db.session.add(retweet)
         db.session.commit()
 
@@ -248,7 +245,7 @@ def retweet(post_id):
         db.session.commit()
 
         msg = "Added retweet to @" + post.author.username +" 's tweet."
-        flash("msg")
+        flash(msg)
         return redirect(url_for('dashboard'))
 
     return render_template("retweet.html", post = post, tweet = new_tweet)
@@ -294,7 +291,7 @@ def delete_tweet(post_id):
 
 @app.route('/delete_retweeted_post/<int:post_id>', methods = ['POST'])
 @login_required
-def delete_retweeted_tweet(post_id):
+def delete_retweeted_post(post_id):
     remove_from_timeline = Timeline.query.filter_by(retweet_id = post_id).first()
     if remove_from_timeline.from_retweet.retweeter != current_user:
         abort(403)
@@ -309,18 +306,28 @@ def delete_retweeted_tweet(post_id):
 
     return redirect(url_for('dashboard'))
 
+@app.route('/news/', methods = ['GET', 'POST'])
+def news():
+    query = searchNews()
+    all_articles = []
+    if query.validate_on_submit():
+        newsapi = NewsApiClient(api_key = '374d7e5e220546f78bcbbd23610a8eec')
+        all_articles = newsapi.get_everything(q = query.query.data)
 
+    return render_template("news.html", query = query, news = all_articles)
 
-@app.route('/like_post/<int:post_id>', methods = ['GET','POST'])
+@app.route('/like_post/<int:post_id>', methods = ['GET' ,'POST'])
 @login_required
 def like_post(post_id):
     post = Post.query.filter_by(id = post_id).first()
     liked = False
     likeID = -1
+
     for i in post.likers:
         if i.liker == current_user.username:
             liked = True
             likeID = i.id
+    
     if liked:
         likeToBeRemoved = Likes.query.filter_by(id = likeID).first()
         db.session.delete(likeToBeRemoved)
@@ -333,16 +340,15 @@ def like_post(post_id):
         flash("liked tweet", 'success')
     db.session.commit()
 
-    return  redirect(url_for('dashboard'))
+    return redirect(url_for('dashboard'))
 
-
-
-@app.route('/like_retweet/<int:post_id>', methods = ['GET','POST'])
+@app.route('/like_retweet/<int:post_id>', methods = ['GET' ,'POST'])
 @login_required
 def like_retweet(post_id):
     retweet = Retweet.query.filter_by(id = post_id).first()
     liked = False
     likeID = -1
+
     for i in retweet.likers:
         if i.liker == current_user.username:
             liked = True
@@ -359,103 +365,87 @@ def like_retweet(post_id):
         retweet.likes += 1
         flash("liked retweet", 'success')
     db.session.commit()
+
     return redirect(url_for('dashboard'))
 
-
-
-@app.route('/comment_post/<int:post_id>', methods = ['GET','POST'])
+@app.route('/comment_post/<int:post_id>', methods = ['GET', 'POST'])
+@login_required
 def comment_post(post_id):
     user_comment = createComment()
     if user_comment.validate_on_submit():
         x = datetime.datetime.now()
         currentTime = str(x.strftime("%d")) + " " + str(x.strftime("%b")) + " " + str(x.strftime("%y")) + " " + str(x.strftime("%I")) + ":" + str(x.strftime("%M")) + " " + str(x.strftime("%p"))
-        comment = Comments(post_id = post_id, user_id = current_user.id, comment = user_comment.comment.data,commenter = current_user.username,comment_stamp = currentTime)
+        comment = Comments(post_id = post_id, user_id = current_user.id, comment = user_comment.comment.data, commenter = current_user.username, comment_stamp = currentTime)
         db.session.add(comment)
         db.session.commit()
-        flash("Commented Succesfully",'success')
+        flash("Commented successfully", "success")
+ 
     comments = Comments.query.filter_by(post_id = post_id).all()
-    return render_template("comment.html",curr_comment = user_comment, comments = comments,name = current_user.username,curr_post_id = post_id)
 
+    return render_template("comment.html", curr_comment = user_comment, comments = comments, name = current_user.username, curr_post_id = post_id)
 
-
-@app.route('/comment_retweet/<int:post_id>', methods = ['GET','POST'])
+@app.route('/comment_retweet/<int:post_id>', methods = ['GET', 'POST'])
+@login_required
 def comment_retweet(post_id):
     user_comment = createComment()
     if user_comment.validate_on_submit():
         x = datetime.datetime.now()
         currentTime = str(x.strftime("%d")) + " " + str(x.strftime("%b")) + " " + str(x.strftime("%y")) + " " + str(x.strftime("%I")) + ":" + str(x.strftime("%M")) + " " + str(x.strftime("%p"))
-        comment = Comments(retweet_id = post_id, user_id = current_user.id, comment = user_comment.comment.data,commenter = current_user.username,comment_stamp = currentTime)
+        comment = Comments(retweet_id = post_id, user_id = current_user.id, comment = user_comment.comment.data, commenter = current_user.username, comment_stamp = currentTime)
         db.session.add(comment)
         db.session.commit()
-        flash("Commented Succesfully",'success')
+        flash("Commented successfully", "success")
+ 
     comments = Comments.query.filter_by(retweet_id = post_id).all()
-    return render_template("comment.html",curr_comment = user_comment, comments = comments,name = current_user.username,curr_post_id = post_id)
 
+    return render_template("comment.html", curr_comment = user_comment, comments = comments, name = current_user.username, curr_post_id = post_id)
 
 @app.route('/delete_post_comment/<int:post_id>/<int:comment_id>')
 @login_required
-def delete_post_comment(comment_id,post_id):
+def delete_post_comment(comment_id, post_id):
     comment = Comments.query.get_or_404(comment_id)
     if comment.commenter != current_user.username:
         abort(403)
-    
-    return render_template('deleteComment.html',post_id = post_id, removed_comment = comment)
+    return render_template("deleteComment.html", post_id = post_id, removed_comment = comment)
 
-@app.route('/deletePostComment/<int:post_id>/<int:comment_id>',methods=['GET','POST'])
-def deletePostComment(comment_id,post_id):
+@app.route('/deletePostComment/<int:post_id>/<int:comment_id>/', methods = ['GET', 'POST'])
+@login_required
+def deletePostComment(comment_id, post_id):
     removed_comment = Comments.query.filter_by(id = comment_id).first()
     if removed_comment.commenter != current_user.username:
         abort(403)
     db.session.delete(removed_comment)
     db.session.commit()
-    flash("Your comment was deleted successfully",'success')
-    return redirect(url_for('comment_post',post_id = post_id,type='post'))
-
+    return redirect(url_for('comment_post', post_id = post_id, type = "post"))
 
 @app.route('/delete_rt_comment/<int:post_id>/<int:comment_id>')
 @login_required
-def delete_rt_comment(comment_id,post_id):
+def delete_rt_comment(comment_id, post_id):
     comment = Comments.query.get_or_404(comment_id)
     if comment.commenter != current_user.username:
         abort(403)
-    
-    return render_template('deleteComment.html',post_id = post_id, removed_comment = comment)
+    return render_template("deleteComment.html", post_id = post_id, removed_comment = comment)
 
-
-@app.route('/deleteRetweetComment/<int:retweet_id>/<int:comment_id>',methods=['GET','POST'])
-def deleteRetweetComment(comment_id,retweet_id):
+@app.route('/deleteRetweetComment/<int:retweet_id>/<int:comment_id>/', methods = ['GET', 'POST'])
+@login_required
+def deleteRetweetComment(comment_id, retweet_id):
     removed_comment = Comments.query.filter_by(id = comment_id).first()
     if removed_comment.commenter != current_user.username:
         abort(403)
     db.session.delete(removed_comment)
     db.session.commit()
-    flash("Your comment was deleted successfully",'success')
-    return redirect(url_for('comment_retweet',post_id = retweet_id,type='post'))
+    return redirect(url_for('comment_retweet', post_id = retweet_id, type = "post"))
 
-
-@app.route('/news', methods = ['GET','POST'])
-def news():
-
-    query = searchNews()
-    all_articles=[]
-    if query.validate_on_submit():
-        newsapi = NewsApiClient(api_key='c2d72a4ef82d4304a5aa8eff2bf67a90')
-        all_articles = newsapi.get_everything(q=query.query.data)
-    return render_template('news.html',query=query,news=all_articles)
-
-
-@app.route('/chat/<int:user1>/<user2>',methods=['GET','POST'])
-def message(user1,user2):
-    if user1!=current_user.id and user2!=current_user.id:
+@app.route('/chat/<int:user1>/<int:user2>', methods = ['GET', 'POST'])
+@login_required
+def message(user1, user2):
+    if user1 != current_user.id and user2 != current_user.id:
         abort(403)
+    sender_id = user1 if current_user.id == user1 else user2
+    receiver_id = user1 if current_user.id != user1 else user2
 
-    sender_id = user1 if current_user.id==user1 else user2
-    receiver_id = user2 if current_user.id==user1 else user1
+    sender = User.query.filter_by(id = sender_id).first()
+    receiver = User.query.filter_by(id = receiver_id).first()
 
-    sender = User.query.filter_by(id=sender_id).first()
-    receiver = User.query.filter_by(id=receiver_id).first()
-
-
-    return render_template('chat.html',sender_id=sender_id,receiver_id=receiver_id,sender=sender,receiver=receiver,user1=user1,user2=user2)
-    
-    
+    return render_template('chat.html', sender_id = sender_id, receiver_id = receiver_id, 
+    sender = sender, receiver = receiver, user1 = user1, user2 = user2)

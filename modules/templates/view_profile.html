@@ -18,6 +18,11 @@
                     <p><img src="https://www.flaticon.com/svg/static/icons/svg/3159/3159408.svg" style="width: 17px; height: auto; margin-right: 10px; margin-left: 20px;" alt="">Born {{ user.bday }}</p>
                 {% endif %}
             </div>
+            <div style="display: block;">
+                {% set user1 = current_user.id if current_user.id < user.id else user.id %}
+                {% set user2 = current_user.id if current_user.id > user.id else user.id %}
+                <a href="{{url_for('message', user1=user1, user2=user2) }}" class="edit_profile">Message</a>
+            </div>
         </div>
     </div>
 </div>
